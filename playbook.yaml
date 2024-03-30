@@ -1,0 +1,45 @@
+---
+- hosts: all
+  tasks:
+    - name: install apache for ubuntu and centos
+      tags: apache,ubuntu,centos
+      package:
+        name:
+          - "{{ apache_package }}"
+        state: present
+        update_cache: yes
+
+    - name: install git for ubuntu and centos
+      tags: git
+      package:
+        name:
+          - git
+        state: present
+        update_cache: yes
+
+    - name: Clone git repo
+      tags: cloned
+      git:
+        repo: https://github.com/busybrainx99/Assignment-1.git
+        dest: /tmp/temp_stay
+        version: main
+        update: yes
+
+    - name: Empty directory /path/to/directory
+      tags: empty
+      shell: rm -rf /var/www/html/*
+
+    - name: sendd temp to permanent
+      tags: copied
+      copy:
+        src: /tmp/temp_stay/
+        dest: /var/www/html
+        remote_src: true
+
+    - name: start centos
+      tags: apache,ubuntu,centos,httpd
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
